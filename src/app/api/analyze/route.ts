@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   if (!input.repoName && !input.readmeText && !input.structureText && !input.issueSummary) {
     return NextResponse.json(
       {
-        error: "Please provide at least one repository input so Repo Sentinel can analyze it.",
+        error: "请至少提供一项仓库信息，这样 Repo Sentinel 才能开始分析。",
       },
       { status: 400 },
     );

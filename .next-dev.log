@@ -1,0 +1,23 @@
+
+> repo-sentinel@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://198.18.0.1:3000
+✓ Ready in 705ms
+
+○ Compiling / ...
+ GET / 200 in 4.8s (next.js: 4.6s, application-code: 238ms)
+ POST /api/analyze 200 in 297ms (next.js: 274ms, application-code: 23ms)
+ GET / 200 in 129ms (next.js: 58ms, application-code: 72ms)
+ GET / 200 in 60ms (next.js: 4ms, application-code: 56ms)
+ GET / 200 in 29ms (next.js: 6ms, application-code: 22ms)
+ GET / 200 in 82ms (next.js: 50ms, application-code: 32ms)
+ GET / 200 in 106ms (next.js: 4ms, application-code: 102ms)
+ POST /api/analyze 200 in 70ms (next.js: 46ms, application-code: 24ms)
+✓ Compiled in 30ms
+ GET / 200 in 170ms (next.js: 57ms, application-code: 113ms)
+ GET / 200 in 76ms (next.js: 41ms, application-code: 36ms)
+ GET / 200 in 94ms (next.js: 4ms, application-code: 90ms)
+ POST /api/analyze 200 in 57ms (next.js: 45ms, application-code: 12ms)

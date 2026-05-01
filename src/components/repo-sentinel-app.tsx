@@ -6,17 +6,17 @@ import { AnalysisOutput, RecommendedAction, RepoInput, RiskLevel } from "@/types
 const EXAMPLE_INPUT: RepoInput = {
   repoName: "acme/ops-dashboard",
   readmeText:
-    "Ops Dashboard is a React and Next.js control plane used by maintainers to monitor incidents, deployment status, and internal tools. The project supports on-call operations but the current README only covers local startup and does not explain architecture or ownership.",
+    "Ops Dashboard 是一个基于 React 和 Next.js 的运维控制台，供维护者查看事故状态、部署进度以及内部工具。这个项目已经支撑值班场景，但当前 README 只覆盖了本地启动方式，没有解释架构设计和模块归属。",
   structureText: `apps/web
 components/
 lib/
 pages/api
 .github/workflows
 scripts/
-No tests directory found
-No docs/architecture record found`,
+未发现 tests 目录
+未发现 docs 或架构记录`,
   issueSummary:
-    "Issues are often missing reproduction details. Several tickets are stale, triage is slow, and maintainers are manually checking regressions before merge.",
+    "很多 Issue 缺少复现细节。有几个工单已经积压较久，分诊速度偏慢，维护者在合并前还需要手动检查回归风险。",
 };
 
 const EMPTY_RESULT: AnalysisOutput | null = null;
@@ -28,7 +28,9 @@ const levelStyles: Record<RiskLevel, string> = {
 };
 
 function priorityLabel(priority: RiskLevel) {
-  return priority.charAt(0).toUpperCase() + priority.slice(1);
+  if (priority === "high") return "高";
+  if (priority === "medium") return "中";
+  return "低";
 }
 
 function ActionCard({ action }: { action: RecommendedAction }) {
@@ -44,8 +46,8 @@ function ActionCard({ action }: { action: RecommendedAction }) {
       </div>
       <p className="text-sm leading-7 text-[var(--muted)]">{action.rationale}</p>
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--muted)]">
-        <span className="rounded-full bg-white/70 px-3 py-1">Owner: {action.owner}</span>
-        <span className="rounded-full bg-white/70 px-3 py-1">ETA: {action.timeframe}</span>
+        <span className="rounded-full bg-white/70 px-3 py-1">负责人：{action.owner}</span>
+        <span className="rounded-full bg-white/70 px-3 py-1">耗时：{action.timeframe}</span>
       </div>
     </article>
   );
@@ -91,14 +93,14 @@ export function RepoSentinelApp() {
 
         if (!response.ok || "error" in data) {
           setResult(null);
-          setError("error" in data ? data.error : "Analysis failed unexpectedly.");
+          setError("error" in data ? data.error : "分析过程中出现了意外错误。");
           return;
         }
 
         setResult(data);
       } catch {
         setResult(null);
-        setError("Network error while contacting the local analysis route.");
+        setError("连接本地分析接口时发生网络错误。");
       }
     });
   }
@@ -122,18 +124,17 @@ export function RepoSentinelApp() {
               </span>
               <div className="space-y-4">
                 <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-                  Repo Sentinel turns raw repository context into a maintainer-ready governance plan.
+                  Repo Sentinel 把零散的仓库上下文整理成维护者可直接执行的治理方案。
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-[var(--muted)] sm:text-lg">
-                  A public demo for a multi-agent style workflow: Scout reconstructs the project shape,
-                  Auditor flags engineering risk, and Planner converts findings into prioritized actions
-                  and GitHub-friendly Markdown.
+                  这是一个多 Agent 风格的公开演示：Scout 负责还原项目轮廓，Auditor 识别工程风险，
+                  Planner 再把发现整理成优先级明确的行动项和可直接复制到 GitHub 的 Markdown 报告。
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 text-sm text-[var(--muted)]">
-                <span className="rounded-full bg-white/80 px-4 py-2">Single-run governance audit</span>
-                <span className="rounded-full bg-white/80 px-4 py-2">Markdown export for issues</span>
-                <span className="rounded-full bg-white/80 px-4 py-2">No GitHub token required</span>
+                <span className="rounded-full bg-white/80 px-4 py-2">单次运行即可完成治理审计</span>
+                <span className="rounded-full bg-white/80 px-4 py-2">支持导出 Issue 用 Markdown</span>
+                <span className="rounded-full bg-white/80 px-4 py-2">无需 GitHub Token</span>
               </div>
             </div>
             <div className="panel rounded-[32px] border p-6">
@@ -142,16 +143,16 @@ export function RepoSentinelApp() {
               </p>
               <ol className="mt-5 space-y-4 text-sm leading-7 text-[var(--muted)]">
                 <li>
-                  <span className="font-semibold text-[var(--foreground)]">01. Intake</span> ingest repository
-                  name, README, structure, and issue snapshots.
+                  <span className="font-semibold text-[var(--foreground)]">01. Intake</span> 输入仓库名称、
+                  README、目录结构以及 Issue 摘要。
                 </li>
                 <li>
-                  <span className="font-semibold text-[var(--foreground)]">02. Analysis</span> simulate Scout,
-                  Auditor, and Planner passes with transparent heuristics.
+                  <span className="font-semibold text-[var(--foreground)]">02. Analysis</span> 用透明规则模拟
+                  Scout、Auditor、Planner 三段分析流程。
                 </li>
                 <li>
-                  <span className="font-semibold text-[var(--foreground)]">03. Action Board</span> output health
-                  score, risks, and an execution queue maintainers can ship.
+                  <span className="font-semibold text-[var(--foreground)]">03. Action Board</span> 输出健康度、
+                  风险项和维护者可以直接落地的执行清单。
                 </li>
               </ol>
             </div>
@@ -163,10 +164,9 @@ export function RepoSentinelApp() {
             <article className="panel rounded-[32px] border p-6 sm:p-7">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-[-0.03em]">Repository Intake</h2>
+                  <h2 className="text-2xl font-semibold tracking-[-0.03em]">仓库输入</h2>
                   <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                    Paste any combination of repository context. Repo Sentinel degrades gracefully when
-                    the input is partial.
+                    可以自由粘贴仓库上下文中的任意组合信息。输入不完整时，Repo Sentinel 也会尽量优雅降级。
                   </p>
                 </div>
                 <button
@@ -179,12 +179,12 @@ export function RepoSentinelApp() {
                   }}
                   className="rounded-full border border-[var(--border)] bg-white/80 px-4 py-2 text-sm font-medium transition hover:border-[var(--accent)] hover:text-[var(--accent-strong)]"
                 >
-                  Load Example
+                  加载示例
                 </button>
               </div>
               <div className="space-y-5">
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">Repository name</span>
+                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">仓库名称</span>
                   <input
                     value={form.repoName}
                     onChange={(event) => setForm({ ...form, repoName: event.target.value })}
@@ -193,32 +193,32 @@ export function RepoSentinelApp() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">README text</span>
+                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">README 内容</span>
                   <textarea
                     value={form.readmeText}
                     onChange={(event) => setForm({ ...form, readmeText: event.target.value })}
                     rows={7}
-                    placeholder="Paste the README or product overview."
+                    placeholder="粘贴 README 或项目简介。"
                     className="w-full rounded-[24px] border border-[var(--border)] bg-white/90 px-4 py-3 outline-none transition focus:border-[var(--accent)]"
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">Structure summary</span>
+                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">目录结构摘要</span>
                   <textarea
                     value={form.structureText}
                     onChange={(event) => setForm({ ...form, structureText: event.target.value })}
                     rows={6}
-                    placeholder="Paste folders, modules, workflows, and architecture hints."
+                    placeholder="粘贴目录、模块、工作流和架构提示。"
                     className="w-full rounded-[24px] border border-[var(--border)] bg-white/90 px-4 py-3 outline-none transition focus:border-[var(--accent)]"
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">Issue / PR summary</span>
+                  <span className="mb-2 block text-sm font-medium text-[var(--foreground)]">Issue / PR 摘要</span>
                   <textarea
                     value={form.issueSummary}
                     onChange={(event) => setForm({ ...form, issueSummary: event.target.value })}
                     rows={5}
-                    placeholder="Paste triage notes, stale issue patterns, or merge pain points."
+                    placeholder="粘贴分诊记录、积压问题或合并痛点。"
                     className="w-full rounded-[24px] border border-[var(--border)] bg-white/90 px-4 py-3 outline-none transition focus:border-[var(--accent)]"
                   />
                 </label>
@@ -230,10 +230,10 @@ export function RepoSentinelApp() {
                   disabled={isPending}
                   className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isPending ? "Analyzing..." : "Run Governance Audit"}
+                  {isPending ? "分析中..." : "开始治理审计"}
                 </button>
                 <span className="text-sm text-[var(--muted)]">
-                  Current target: {deferredRepoName || "Unnamed repository"}
+                  当前目标：{deferredRepoName || "未命名仓库"}
                 </span>
               </div>
               {error ? (
@@ -244,12 +244,12 @@ export function RepoSentinelApp() {
             </article>
 
             <article className="panel rounded-[32px] border p-6 sm:p-7">
-              <h3 className="text-xl font-semibold tracking-[-0.03em]">Agent Design</h3>
+              <h3 className="text-xl font-semibold tracking-[-0.03em]">Agent 设计</h3>
               <div className="mt-5 grid gap-4">
                 {[
-                  ["Scout", "Recovers repository intent, shape, and missing context from the supplied materials."],
-                  ["Auditor", "Detects testing, automation, documentation, and collaboration risk patterns."],
-                  ["Planner", "Converts weak signals into prioritized actions with owners and timeframes."],
+                  ["Scout", "从现有材料中恢复仓库意图、结构形态以及缺失的上下文。"],
+                  ["Auditor", "识别测试、自动化、文档和协作流程中的风险信号。"],
+                  ["Planner", "把弱信号整理成可执行、可排序的行动项，并给出负责人和时间预估。"],
                 ].map(([name, copy]) => (
                   <div key={name} className="rounded-[24px] border border-[var(--border)] bg-white/70 p-4">
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)]">
@@ -266,9 +266,9 @@ export function RepoSentinelApp() {
             <article className="panel rounded-[32px] border p-6 sm:p-7">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-[-0.03em]">Governance Scorecard</h2>
+                  <h2 className="text-2xl font-semibold tracking-[-0.03em]">治理评分卡</h2>
                   <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                    A concise output designed for maintainers, hiring reviewers, and GitHub issue exports.
+                    为维护者、面试评审和 GitHub Issue 导出场景准备的简洁结果面板。
                   </p>
                 </div>
                 <div
@@ -277,7 +277,7 @@ export function RepoSentinelApp() {
                 >
                   <div className="text-center">
                     <p className="text-3xl font-semibold">{result?.score ?? "--"}</p>
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Health</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">健康度</p>
                   </div>
                 </div>
               </div>
@@ -287,22 +287,22 @@ export function RepoSentinelApp() {
                   <p className="text-sm leading-8 text-[var(--muted)]">{result.summary}</p>
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="rounded-[24px] bg-white/75 p-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">High risk</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">高风险</p>
                       <p className="mt-2 text-3xl font-semibold text-[var(--danger)]">{stats.high}</p>
                     </div>
                     <div className="rounded-[24px] bg-white/75 p-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Medium risk</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">中风险</p>
                       <p className="mt-2 text-3xl font-semibold text-[var(--accent-strong)]">{stats.medium}</p>
                     </div>
                     <div className="rounded-[24px] bg-white/75 p-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Low risk</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">低风险</p>
                       <p className="mt-2 text-3xl font-semibold text-[var(--signal)]">{stats.low}</p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="mt-6 rounded-[28px] border border-dashed border-[var(--border)] bg-white/55 p-6 text-sm leading-7 text-[var(--muted)]">
-                  Run the audit to see a computed health score, agent signals, and an action board.
+                  运行审计后，这里会显示健康度、Agent 信号和行动面板。
                 </div>
               )}
             </article>
@@ -310,16 +310,19 @@ export function RepoSentinelApp() {
             <article className="panel rounded-[32px] border p-6 sm:p-7">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-semibold tracking-[-0.03em]">Findings</h3>
+                  <h3 className="text-xl font-semibold tracking-[-0.03em]">关键发现</h3>
                   <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                    Each finding is attributed to the agent pass that surfaced it.
+                    每条发现都会标记它来自哪一个 Agent 阶段。
                   </p>
                 </div>
               </div>
               <div className="mt-5 grid gap-4">
                 {result ? (
                   result.risks.map((risk) => (
-                    <article key={`${risk.agent}-${risk.title}`} className="rounded-[26px] border border-[var(--border)] bg-white/70 p-5">
+                    <article
+                      key={`${risk.agent}-${risk.title}`}
+                      className="rounded-[26px] border border-[var(--border)] bg-white/70 p-5"
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${levelStyles[risk.level]}`}
@@ -336,7 +339,7 @@ export function RepoSentinelApp() {
                   ))
                 ) : (
                   <div className="rounded-[24px] border border-dashed border-[var(--border)] bg-white/55 p-5 text-sm leading-7 text-[var(--muted)]">
-                    Findings will appear here after analysis.
+                    分析完成后，发现列表会显示在这里。
                   </div>
                 )}
               </div>
@@ -345,9 +348,9 @@ export function RepoSentinelApp() {
             <article className="panel rounded-[32px] border p-6 sm:p-7">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-semibold tracking-[-0.03em]">Action Board</h3>
+                  <h3 className="text-xl font-semibold tracking-[-0.03em]">行动面板</h3>
                   <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                    Governance tasks generated from the highest-value next steps.
+                    这里会展示最值得优先推进的治理任务。
                   </p>
                 </div>
                 <button
@@ -356,7 +359,7 @@ export function RepoSentinelApp() {
                   disabled={!result}
                   className="rounded-full border border-[var(--border)] bg-white/80 px-4 py-2 text-sm font-medium transition hover:border-[var(--accent)] hover:text-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {copied ? "Markdown Copied" : "Copy Markdown Report"}
+                  {copied ? "Markdown 已复制" : "复制 Markdown 报告"}
                 </button>
               </div>
               <div className="mt-5 grid gap-4">
@@ -364,14 +367,14 @@ export function RepoSentinelApp() {
                   result.actions.map((action) => <ActionCard key={action.title} action={action} />)
                 ) : (
                   <div className="rounded-[24px] border border-dashed border-[var(--border)] bg-white/55 p-5 text-sm leading-7 text-[var(--muted)]">
-                    The action queue will populate after the audit completes.
+                    审计完成后，这里会生成治理行动清单。
                   </div>
                 )}
               </div>
             </article>
 
             <article className="panel rounded-[32px] border p-6 sm:p-7">
-              <h3 className="text-xl font-semibold tracking-[-0.03em]">Agent Signals</h3>
+              <h3 className="text-xl font-semibold tracking-[-0.03em]">Agent 信号</h3>
               <div className="mt-4 grid gap-3">
                 {result ? (
                   result.signals.map((signal) => (
@@ -381,7 +384,7 @@ export function RepoSentinelApp() {
                   ))
                 ) : (
                   <div className="rounded-[24px] border border-dashed border-[var(--border)] bg-white/55 p-5 text-sm leading-7 text-[var(--muted)]">
-                    Repo Sentinel will summarize confidence signals and evidence quality here.
+                    Repo Sentinel 会在这里总结判断依据和置信度信号。
                   </div>
                 )}
               </div>
